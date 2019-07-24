@@ -8,13 +8,12 @@ from kafka.errors import KafkaError
 producer = KafkaProducer(bootstrap_servers='localhost:29092')
 topic = 'video-topic'
 
-
-def emit_video(path_to_video):
+def emit_video():
     print('start emitting')
 
-    video = cv2.VideoCapture(path_to_video)
+    video = cv2.VideoCapture(0)
 
-    while video.isOpened():
+    while True:
         success, frame = video.read()
         if not success:
             break
@@ -23,17 +22,15 @@ def emit_video(path_to_video):
         data = cv2.imencode('.jpeg', frame)[1].tobytes()
 
         future = producer.send(topic, data)
+
         try:
             future.get(timeout=10)
+
         except KafkaError as e:
             print(e)
             break
 
-        print('.', end='', flush=True)
 
-        # to reduce CPU usage
-        #time.sleep(0.2)
-    print()
 
     video.release()
 
@@ -41,9 +38,4 @@ def emit_video(path_to_video):
 
 
 if __name__ == '__main__':
-    emit_video('/Users/dtremer/Desktop/word-embeddings-from-scratch-master/vae_training_256.mp4')
-
-    # if len(sys.argv) < 2:
-    #     print('You need to specify a path to video file.')
-    #     sys.exit(1)
-    # emit_video(sys.argv[1])
+    emit_video()

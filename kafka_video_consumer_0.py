@@ -1,16 +1,13 @@
 from flask import Flask, Response
 from kafka import KafkaConsumer
 
-consumer = KafkaConsumer('video-topic', bootstrap_servers='localhost:29092')
+consumer = KafkaConsumer('video-topic_0', bootstrap_servers='localhost:29092')
 
 app = Flask(__name__)
 
 
 def kafkastream():
     for message in consumer:
-
-        print(str(message)[:1000])
-
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + message.value + b'\r\n\r\n')
 
@@ -22,4 +19,4 @@ def index():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

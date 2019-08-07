@@ -1,6 +1,6 @@
 import time
-import sys
 import cv2
+import hashlib
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError
@@ -18,10 +18,12 @@ def emit_video():
         if not success:
             break
 
-        # png might be too large to emit
         data = cv2.imencode('.jpeg', frame)[1].tobytes()
 
-        future = producer.send(topic, data)
+        key = hashlib.md5(bytes(str(time.time()).encode('UTF-8'))+bytes(data)).hexdigest()
+        print(key)
+
+        future = producer.send(topic, data, key=bytes(str(key).encode('ASCII')))
 
         try:
             future.get(timeout=10)
